@@ -92,17 +92,17 @@ Public Class Main
             If Not P.Team = MyTeam Then
                 Dim SBInfo As New StringBuilder(ChampIDToName(P.ChampionID) + " is in " + P.Tier + " " + P.Division.ToString())
 
-                If P.KDA > 3 Then
-                    If P.WinLoss < 60 Then
-                        SBInfo.Append(", and has a K.D.A. of " + P.KDA.ToString())
-                    Else
+                If P.GamesPlayed >= 10 Then 'ignore the rest of the stats if they haven't played a few games yet
+                    If P.KDA > 3 Then
                         SBInfo.Append(", has a K.D.A. of " + P.KDA.ToString())
+                    End If
+
+                    If P.WinLoss > 60 Then
+                        SBInfo.Append(", has a win rate of " + P.WinLoss.ToString() + "%")
                     End If
                 End If
 
-                If P.WinLoss > 60 Then
-                    SBInfo.Append(", and has a win rate of " + P.WinLoss.ToString() + "%")
-                End If
+                SBInfo.Append(", and has played " + P.GamesPlayed.ToString() + " games as " + ChampIDToName(P.ChampionID))
 
                 S.Say(SBInfo.ToString())
             End If

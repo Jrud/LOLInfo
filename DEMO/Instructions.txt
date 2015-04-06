@@ -1,7 +1,11 @@
-Instructions on running SCOUT beta software:
+INSTRUCTIONS ON RUNNING THIS VERSION OF THE SCOUT SOFTWARE:
 
 1. Copy this DEMO folder to anywhere on your system.
 2. Run SCOUT.exe.  
+
+
+
+BASICS OF USING THIS VERSION OF SCOUT:
 
 Scout will think your name is John (her creator).  She isn't done yet, pay no mind.
 
@@ -9,7 +13,7 @@ Scout currenlty uses the windows speech recognition software built into your PC.
 training found in the control panel first.
 
 To add and remove apps, simply place new app DLL's into the PLUGINS folder.  This demo includes a few to start off with.  An app library will be available when SCOUT leaves
-beta.
+beta (currently not even in alpha right now, this is strictly for the purposes of demoing the LOLInfo app).
 
 Once the software has launched, say clearly into the microphone: "Hey Scout".  She will only reply to the wake-up commands if she is at least 90% sure you are calling to her.
 
@@ -19,6 +23,9 @@ Many other commands will work, these are just examples to get started.
 
 When you are done with SCOUT, simply close the program, or you can say "Thanks Scout" to put her into sleeping mode.
 
+
+
+USING THE LOLInfo APP COMMANDS:
 
 To use the LOLInfo app, first set your summoner name with the "Set Summoner Name" command.
 
