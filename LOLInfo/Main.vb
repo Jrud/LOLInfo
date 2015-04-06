@@ -46,7 +46,7 @@ Public Class Main
 
     Dim LOLGrammarList As New List(Of System.Speech.Recognition.Grammar)
     Private SetSummoner As Grammar = New Grammar(New Choices(New String() {"Set Summoner Name", "Set My Summoner Name", "Set The Summoner Name", "I Would Like To Set My Summoner Name", "Lets Set My Summoner Name", "Set My Summoner Name Please", "Set Summoner Name Please", "Lets Set My Summoner Name Please", "Give Me A Tactical Analysis Of The Enemy Team", "Let's Have A Tactical Analysis"}))
-    Private GetGameInfo As Grammar = New Grammar(New Choices(New String() {"Get Basic Game Info", "Get Current Match Info", "Get Current Match Stats", "Match Info", "Match Stats", "Give Me The Match Stats Please", "Current Match Stats", "Current Match Info"}))
+    Private GetGameInfo As Grammar = New Grammar(New Choices(New String() {"Get Basic Game Info", "Get Current Match Info", "Get Current Match Stats", "Match Info", "Match Stats", "Match Stats Please", "Give Me The Match Stats Please", "Current Match Stats", "Current Match Info"}))
 
     Public Function MainMenuGrammars() As System.Collections.Generic.List(Of System.Speech.Recognition.Grammar) Implements SCOUT.IRecognitionPlugin.MainMenuGrammars
 
@@ -100,12 +100,12 @@ Public Class Main
                     End If
                 End If
 
-                    If P.WinLoss > 60 Then
-                        SBInfo.Append(", and has a win rate of " + P.WinLoss.ToString() + "%")
-                    End If
-
-                    S.Say(SBInfo.ToString())
+                If P.WinLoss > 60 Then
+                    SBInfo.Append(", and has a win rate of " + P.WinLoss.ToString() + "%")
                 End If
+
+                S.Say(SBInfo.ToString())
+            End If
         Next
     End Sub
 
@@ -192,7 +192,7 @@ Public Class Player
             Return lGamesPlayed
         End Get
     End Property
-    Public ReadOnly Property KDA As Long
+    Public ReadOnly Property KDA As Double
         Get
             If dKDA = -1 Then
                 AcquireRankedDetails(ChampionID)
@@ -294,11 +294,13 @@ Public Class Player
     End Sub
 
     Private Sub AcquireRankedDetails(ByVal ChampID As Integer)
-        Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.3/stats/by-summoner/" + SummonerID.ToString() + "/ranked?season=SEASON2015&api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
+        Dim WR As HttpWebRequest
+
         Dim Resp As WebResponse
         Dim Success As Boolean = False
         While Not Success
             Try
+                WR = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.3/stats/by-summoner/" + SummonerID.ToString() + "/ranked?season=SEASON2015&api_key=920b706e-c903-441c-8e5a-ddc8654f8404&randthing=" + Guid.NewGuid().ToString())
                 Resp = WR.GetResponse()
                 Success = True
             Catch ex As Exception

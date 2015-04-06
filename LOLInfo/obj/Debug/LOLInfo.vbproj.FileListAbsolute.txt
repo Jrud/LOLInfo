@@ -16,7 +16,6 @@ F:\GIT\LOLInfo\LOLInfo\bin\Debug\LOLInfo.pdb
 F:\GIT\LOLInfo\LOLInfo\bin\Debug\LOLInfo.xml
 F:\GIT\LOLInfo\LOLInfo\bin\Debug\GenericDataAccessClass.dll
 F:\GIT\LOLInfo\LOLInfo\bin\Debug\SCOUT.exe
-F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.Resources.resources
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
