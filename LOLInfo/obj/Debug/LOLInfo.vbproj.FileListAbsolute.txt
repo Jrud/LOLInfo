@@ -21,3 +21,14 @@ F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.xml
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.pdb
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\bin\Debug\LOLInfo.dll
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\bin\Debug\LOLInfo.pdb
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\bin\Debug\LOLInfo.xml
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\bin\Debug\GenericDataAccessClass.dll
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\bin\Debug\SCOUT.exe
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.Resources.resources
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.xml
+C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.pdb

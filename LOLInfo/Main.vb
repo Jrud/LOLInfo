@@ -31,6 +31,12 @@ Public Class Main
             If DSData.Tables(0).Rows.Count = 0 Then
                 DB.DBInsert("INSERT INTO tblMaint (DataKey, KeyVal) VALUES (""SummonerName"", """")")
             End If
+
+            Dim DSData2 As DataSet = DB.DBSelect("SELECT KeyVal FROM tblMaint WHERE DataKey = ""SummonerID""")
+
+            If DSData2.Tables(0).Rows.Count = 0 Then
+                DB.DBInsert("INSERT INTO tblMaint (DataKey, KeyVal) VALUES (""SummonerID"", ""-1"")")
+            End If
         Catch ex As Exception
             DB.DBInsert("CREATE TABLE tblMaint (MaintID AUTOINCREMENT PRIMARY KEY, DataKey Text, KeyVal Text);")
 
@@ -47,11 +53,23 @@ Public Class Main
     Dim LOLGrammarList As New List(Of System.Speech.Recognition.Grammar)
     Private SetSummoner As Grammar = New Grammar(New Choices(New String() {"Set Summoner Name", "Set My Summoner Name", "Set The Summoner Name", "I Would Like To Set My Summoner Name", "Lets Set My Summoner Name", "Set My Summoner Name Please", "Set Summoner Name Please", "Lets Set My Summoner Name Please", "Give Me A Tactical Analysis Of The Enemy Team", "Let's Have A Tactical Analysis"}))
     Private GetGameInfo As Grammar = New Grammar(New Choices(New String() {"Get Basic Game Info", "Get Current Match Info", "Get Current Match Stats", "Match Info", "Match Stats", "Match Stats Please", "Give Me The Match Stats Please", "Current Match Stats", "Current Match Info"}))
+    Private GetSummonerInfo As Grammar
 
     Public Function MainMenuGrammars() As System.Collections.Generic.List(Of System.Speech.Recognition.Grammar) Implements SCOUT.IRecognitionPlugin.MainMenuGrammars
 
         LOLGrammarList.Add(SetSummoner)
         LOLGrammarList.Add(GetGameInfo)
+
+        Dim CH As New Choices()
+
+        Dim DSChamps As DataSet = DB.DBSelect("SELECT Name FROM tblLOLChamps")
+
+        For Each row As DataRow In DSChamps.Tables(0).Rows
+            CH.Add(New String() {"Tell me about the enemy " + row("name").ToString()})
+            CH.Add(New String() {"Tell me about the allied " + row("name").ToString()})
+        Next
+
+        GetSummonerInfo = New Grammar(CH)
 
         Return LOLGrammarList
     End Function
@@ -69,10 +87,56 @@ Public Class Main
             S.Say("Please wait while I collect the information")
 
             GetCurrentMatchStats()
+        ElseIf e.Result.Grammar Is GetSummonerInfo Then
+            S.Say("Please wait while I collect the information")
+
+            If e.Result.Text.Contains("enemy") Then
+                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+            Else
+                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+            End If
         End If
 
         Return False
     End Function
+
+    Private Sub GetPlayerStats(ChampName As String, team As String)
+        'get the current player's SummonerID
+        Dim SummonerID As Long = WSGetSummonerID()
+
+        'Get the ChampionID requested
+        Dim ChampionID As Integer = DB.DBSelect("SELECT ChampID FROM tblLOLChamps WHERE ChampName = """ + ChampName + """").Tables(0).Rows(0).Item(0)
+
+        'Get list of players in current the game
+        Dim L As List(Of Player) = WSGetPlayerList(SummonerID)
+
+        'Determine which TeamID the requested player is on based on the current player's team and whether they said "enemy" or "allied"
+        Dim PlayerTeam As Integer = 0
+        For Each P As Player In L
+            If P.SummonerID = SummonerID Then
+                If team = "enemy" Then
+                    If P.Team = 1 Then
+                        PlayerTeam = 2
+                    Else
+                        PlayerTeam = 1
+                    End If
+                Else
+                    PlayerTeam = P.Team
+                End If
+            End If
+        Next
+
+        'Find the particular player in question
+        Dim RequestedPlayer As Player = Nothing
+        For Each p As Player In L
+            If p.Team = PlayerTeam AndAlso p.ChampionID = ChampionID Then
+                RequestedPlayer = p
+            End If
+        Next
+
+        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " games, has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString() + " as " + ChampName + ".")
+        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + "/" + RequestedPlayer.DefensiveMasteryCount.ToString() + "/" + RequestedPlayer.UtilityMasteryCount.ToString())
+    End Sub
 
     Private Sub GetCurrentMatchStats()
 
@@ -102,7 +166,7 @@ Public Class Main
                     End If
                 End If
 
-                SBInfo.Append(", and has played " + P.GamesPlayed.ToString() + " games as " + ChampIDToName(P.ChampionID))
+                SBInfo.Append(", and has played " + P.GamesPlayed.ToString() + " ranked games as " + ChampIDToName(P.ChampionID))
 
                 S.Say(SBInfo.ToString())
             End If
@@ -133,21 +197,31 @@ Public Class Main
         Return DB.DBSelect("SELECT KeyVal FROM tblMaint WHERE DataKey = ""SummonerName""").Tables(0).Rows(0).Item(0).ToString()
     End Function
 
-    Private Function WSGetSummonerID() As Integer
-        Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + DBGetSummonerName() + "?api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
+    Private Function WSGetSummonerID() As Long
+        Dim DBSummonerID As Long = DB.DBSelect("SELECT KeyVal FROM tblMaint WHERE DataKey = ""SummonerID""").Tables(0).Rows(0).Item(0)
 
-        Dim Resp As WebResponse = WR.GetResponse()
+        If DBSummonerID = -1 Then
+            Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/" + DBGetSummonerName() + "?api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
 
-        Dim Temp As String = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
+            Dim Resp As WebResponse = WR.GetResponse()
 
-        Temp = Temp.Substring(Temp.IndexOf("""id"":") + 5)
-        Return CLng(Temp.Substring(0, Temp.IndexOf(",")))
+            Dim Temp As String = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
+
+            Temp = Temp.Substring(Temp.IndexOf("""id"":") + 5)
+
+            DBSummonerID = CLng(Temp.Substring(0, Temp.IndexOf(",")))
+
+            DB.DBInsert("INSERT INTO tblMaint SET KeyVal = """ + DBSummonerID.ToString() + """ WHERE DataKey = ""SummonerID""")
+        End If
+
+        Return DBSummonerID
     End Function
 
     Private Sub RequestSummonerName()
         S.Say("Please type in your summoner name")
 
         DB.DBUpdate("UPDATE tblMaint SET KeyVal = """ + InputBox("What is your summoner name?", "Input Summoner Name").Replace("""", """""") + """ WHERE DataKey = ""SummonerName""")
+        DB.DBUpdate("UPDATE tblMaint SET KeyVal = ""-1"" WHERE DataKey = ""SummonerID""")
     End Sub
 
     Private Function ChampIDToName(ByVal ChampID As Integer) As String
@@ -182,6 +256,10 @@ Public Class Player
     Private dKDA As Double = -1
     Private dKD As Double = -1
     Private dWinLoss As Double = -1
+
+    Public OffensiveMasteryCount As Integer
+    Public DefensiveMasteryCount As Integer
+    Public UtilityMasteryCount As Integer
 
     Public ReadOnly Property GamesPlayed As Long
         Get
@@ -265,7 +343,37 @@ Public Class Player
         ChampionID = CLng(Temp.Substring(0, Temp.IndexOf(",")))
 
         Team = CInt(ParticipantXML.Substring(0, 1))
+
+        'Masteries
+        Temp = ParticipantXML.Substring(ParticipantXML.IndexOf("""masteries"":"))
+        Temp = ParticipantXML.Substring(0, ParticipantXML.IndexOf("]"))
+
+        OffensiveMasteryCount = CountWords(Temp, "41")
+        DefensiveMasteryCount = CountWords(Temp, "42")
+        UtilityMasteryCount = CountWords(Temp, "43")
     End Sub
+
+
+    Public Function CountWords(ByVal input As String, ByVal phrase As String) As Integer
+        Dim Occurrences As Integer = 0
+
+        Dim intCursor As Integer = 0
+        Do Until intCursor >= input.Length
+
+            Dim strCheckThisString As String = Mid(LCase(input), intCursor + 1, (Len(input) - intCursor))
+
+            Dim intPlaceOfPhrase As Integer = InStr(strCheckThisString, phrase)
+            If intPlaceOfPhrase > 0 Then
+                Occurrences += 1
+                intCursor += (intPlaceOfPhrase + Len(phrase) - 1)
+            Else
+                intCursor = input.Length
+            End If
+
+        Loop
+
+        Return Occurrences
+    End Function
 
     Private Sub AcquireLeagueDetails()
         Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + SummonerID.ToString() + "/entry?api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
