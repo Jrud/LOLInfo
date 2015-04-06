@@ -7,7 +7,7 @@ INSTRUCTIONS ON RUNNING THIS VERSION OF THE SCOUT SOFTWARE:
 
 BASICS OF USING THIS VERSION OF SCOUT:
 
-Scout will think your name is John (her creator).  She isn't done yet, pay no mind.
+Scout will start out calling you Master.  You can ask her to change your name if you like.
 
 Scout currenlty uses the windows speech recognition software built into your PC.  She will be much better at understanding you if you go through the speech recognition 
 training found in the control panel first.
@@ -17,11 +17,15 @@ beta (currently not even in alpha right now, this is strictly for the purposes o
 
 Once the software has launched, say clearly into the microphone: "Hey Scout".  She will only reply to the wake-up commands if she is at least 90% sure you are calling to her.
 
-To ask her about the plugins currently installed say "What can you do?".
+To ask her about the plugins currently installed say "What can you do?", or "Command List".
 
 Many other commands will work, these are just examples to get started.
 
 When you are done with SCOUT, simply close the program, or you can say "Thanks Scout" to put her into sleeping mode.
+
+If she doesn't understand something, she will say "What is...".  If using her in a loud room she may pick up a lot of background noise and try to make sense of it.  If using
+her with speakers, she may hear herself talk and think you are talking.  This can create a frustrating echo effect.  Use a headset for the best quality.
+
 
 
 
