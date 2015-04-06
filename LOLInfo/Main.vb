@@ -348,9 +348,9 @@ Public Class Player
         Temp = ParticipantXML.Substring(ParticipantXML.IndexOf("""masteries"":"))
         Temp = ParticipantXML.Substring(0, ParticipantXML.IndexOf("]"))
 
-        OffensiveMasteryCount = CountWords(Temp, "41")
-        DefensiveMasteryCount = CountWords(Temp, "42")
-        UtilityMasteryCount = CountWords(Temp, "43")
+        OffensiveMasteryCount = CountWords(Temp, ":41")
+        DefensiveMasteryCount = CountWords(Temp, ":42")
+        UtilityMasteryCount = CountWords(Temp, ":43")
     End Sub
 
 
