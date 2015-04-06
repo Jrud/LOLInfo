@@ -1,0 +1,24 @@
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\LOLInfo.dll
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\LOLInfo.pdb
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\LOLInfo.xml
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\GenericDataAccessClass.dll
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\SCOUT.exe
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\SCOUT.pdb
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\bin\Debug\SCOUT.xml
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.Resources.resources
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.dll
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.xml
+C:\Users\HOTH\Desktop\Project SCOUT\SCOUT\LOLInfo\obj\Debug\LOLInfo.pdb
+F:\GIT\LOLInfo\LOLInfo\bin\Debug\LOLInfo.dll
+F:\GIT\LOLInfo\LOLInfo\bin\Debug\LOLInfo.pdb
+F:\GIT\LOLInfo\LOLInfo\bin\Debug\LOLInfo.xml
+F:\GIT\LOLInfo\LOLInfo\bin\Debug\GenericDataAccessClass.dll
+F:\GIT\LOLInfo\LOLInfo\bin\Debug\SCOUT.exe
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.Resources.resources
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.xml
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.pdb
