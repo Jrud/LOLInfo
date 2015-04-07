@@ -69,8 +69,8 @@ Public Class Main
         Dim DSChamps As DataSet = DB.DBSelect("SELECT Name FROM tblLOLChamps")
 
         For Each row As DataRow In DSChamps.Tables(0).Rows
-            CH.Add(New String() {"Tell me about the enemy " + row("name").ToString()})
-            CH.Add(New String() {"Tell me about the allied " + row("name").ToString()})
+            CH.Add(New String() {"Tell me about the enemy " + row("name").ToString(), "Lets have the info on the enemy " + row("name").ToString(), "Gimme the stats for the enemy " + row("name").ToString(), "Give me the stats on the enemy " + row("name").ToString()})
+            CH.Add(New String() {"Tell me about the allied " + row("name").ToString(), "Lets have the info on the allied " + row("name").ToString(), "Gimme the stats for the allied " + row("name").ToString(), "Give me the stats on the allied " + row("name").ToString()})
         Next
 
         GetSummonerInfo = New Grammar(CH)

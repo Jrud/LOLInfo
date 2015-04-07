@@ -32,4 +32,3 @@ C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.
 C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
 C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.xml
 C:\Users\JRuder\Documents\GitHub\SCOUT-LOLInfo\LOLInfo\obj\Debug\LOLInfo.pdb
-F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
