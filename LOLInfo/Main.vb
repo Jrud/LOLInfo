@@ -4,8 +4,12 @@ Imports System.Net
 Imports System.IO
 Imports System.Text
 
+
+
 Public Class Main
     Implements SCOUT.IRecognitionPlugin
+
+    Public RunesXML As String
 
 
     Public Function AddedFunctionality() As System.Collections.Generic.List(Of String) Implements SCOUT.IRecognitionPlugin.AddedFunctionality
@@ -137,8 +141,9 @@ Public Class Main
         Next
 
         S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " games, has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
-        S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division + ".")
-        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " / " + RequestedPlayer.DefensiveMasteryCount.ToString() + " / " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
+        S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division.ToString() + ".")
+        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " " + RequestedPlayer.DefensiveMasteryCount.ToString() + " and " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
+        S.Say(RequestedPlayer.RuneList)
     End Sub
 
     Private Sub GetCurrentMatchStats()
@@ -189,7 +194,7 @@ Public Class Main
 
         For Each S As String In Temp.Split(New String() {"{""teamId"":"}, StringSplitOptions.RemoveEmptyEntries)
             If Not S = "" Then
-                L.Add(New Player(S))
+                L.Add(New Player(S, RunesXML))
             End If
         Next
 
@@ -263,6 +268,7 @@ Public Class Player
     Public OffensiveMasteryCount As Integer
     Public DefensiveMasteryCount As Integer
     Public UtilityMasteryCount As Integer
+    Public RuneList As String
 
     Public ReadOnly Property GamesPlayed As Long
         Get
@@ -324,7 +330,7 @@ Public Class Player
         End Get
     End Property
 
-    Public Sub New(ByVal ParticipantXML As String)
+    Public Sub New(ByVal ParticipantXML As String, ByRef RunesXML As String)
         Dim Temp As String = ParticipantXML.Substring(ParticipantXML.IndexOf("""summonerName"":""") + 16)
         Name = Temp.Substring(0, Temp.IndexOf(""","))
 
@@ -341,7 +347,50 @@ Public Class Player
         Temp = Temp.Substring(0, Temp.IndexOf("]"))
 
         CalculateMasteries(Temp)
+
+        Temp = ParticipantXML.Substring(ParticipantXML.IndexOf("""runes"":[") + 9)
+        Temp = Temp.Substring(0, Temp.IndexOf("]"))
+
+        RuneList = CalculateRuneList(Temp, RunesXML)
     End Sub
+
+    Public Function CalculateRuneList(ByVal RuneXML As String, ByRef RunesXML As String) As String
+        Dim SB As New StringBuilder("The selected rune page consists of ")
+        Dim Count As Integer = -1
+        Dim Temp As String = ""
+        Dim RuneId As Integer = -1
+
+        Dim parts() As String = RuneXML.Split(New String() {"},{"}, System.StringSplitOptions.RemoveEmptyEntries)
+        Dim S As String
+
+        For i As Integer = 0 To parts.Count - 1
+            S = parts(i)
+
+            Temp = S.Substring(S.IndexOf(":") + 1)
+            Count = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+
+            RuneId = CInt(Temp.Substring(Temp.LastIndexOf(":") + 1).Replace("}", ""))
+
+            SB.Append(Count.ToString() + " " + GetRuneName(RuneId, RunesXML) + ", ")
+        Next
+
+        Return SB.ToString()
+    End Function
+
+    Private Function GetRuneName(ByVal RuneID As Integer, ByRef RunesXML As String) As String
+        If RunesXML = "" Then
+            Dim WR As HttpWebRequest = HttpWebRequest.Create("https://global.api.pvp.net/api/lol/static-data/na/v1.2/rune?runeListData=basic&api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
+
+            Dim Resp As WebResponse = WR.GetResponse()
+
+            RunesXML = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
+        End If
+
+        Dim Temp As String = RunesXML.Substring(RunesXML.IndexOf("""id"":" + RuneID.ToString()))
+        Temp = Temp.Substring(Temp.IndexOf("""name"":""") + 8)
+
+        Return Temp.Substring(0, Temp.IndexOf(""","))
+    End Function
 
     Private Sub CalculateMasteries(ByVal MasteryXML As String)
         Dim Rank As Integer = -1
@@ -402,27 +451,34 @@ Public Class Player
             End Try
         End While
         Dim LeagueXML As String = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
-        LeagueXML = LeagueXML.Substring(LeagueXML.IndexOf("""id"":" + ChampID.ToString()))
-        LeagueXML = LeagueXML.Substring(0, LeagueXML.IndexOf("}"))
+        If LeagueXML.Contains("""id"":" + ChampID.ToString()) Then
+            LeagueXML = LeagueXML.Substring(LeagueXML.IndexOf("""id"":" + ChampID.ToString()))
+            LeagueXML = LeagueXML.Substring(0, LeagueXML.IndexOf("}"))
 
-        Dim Temp As String = LeagueXML.Substring(LeagueXML.IndexOf("""totalSessionsPlayed"":") + 22)
-        lGamesPlayed = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+            Dim Temp As String = LeagueXML.Substring(LeagueXML.IndexOf("""totalSessionsPlayed"":") + 22)
+            lGamesPlayed = CInt(Temp.Substring(0, Temp.IndexOf(",")))
 
-        Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalDeathsPerSession"":") + 24)
-        Dim Deaths As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+            Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalDeathsPerSession"":") + 24)
+            Dim Deaths As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
 
-        Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalChampionKills"":") + 21)
-        Dim Kills As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+            Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalChampionKills"":") + 21)
+            Dim Kills As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
 
-        Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalAssists"":") + 15)
-        Dim Assists As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+            Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalAssists"":") + 15)
+            Dim Assists As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
 
-        dKD = Kills / Deaths
-        dKDA = (Kills + Assists) / Deaths
+            dKD = Kills / Deaths
+            dKDA = (Kills + Assists) / Deaths
 
-        Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalSessionsWon"":") + 19)
-        Dim Wins As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
+            Temp = LeagueXML.Substring(LeagueXML.IndexOf("""totalSessionsWon"":") + 19)
+            Dim Wins As Long = CInt(Temp.Substring(0, Temp.IndexOf(",")))
 
-        dWinLoss = (Wins / GamesPlayed) * 100
+            dWinLoss = (Wins / GamesPlayed) * 100
+        Else
+            lGamesPlayed = 0
+            dKD = 0
+            dKDA = 0
+            dWinLoss = 0
+        End If
     End Sub
 End Class
