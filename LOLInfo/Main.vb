@@ -71,6 +71,8 @@ Public Class Main
 
         GetSummonerInfo = New Grammar(CH)
 
+        LOLGrammarList.Add(GetSummonerInfo)
+
         Return LOLGrammarList
     End Function
 
@@ -100,12 +102,12 @@ Public Class Main
         Return False
     End Function
 
-    Private Sub GetPlayerStats(ChampName As String, team As String)
+    Private Sub GetPlayerStats(ByVal ChampName As String, ByVal team As String)
         'get the current player's SummonerID
         Dim SummonerID As Long = WSGetSummonerID()
 
         'Get the ChampionID requested
-        Dim ChampionID As Integer = DB.DBSelect("SELECT ChampID FROM tblLOLChamps WHERE ChampName = """ + ChampName + """").Tables(0).Rows(0).Item(0)
+        Dim ChampionID As Integer = DB.DBSelect("SELECT ChampID FROM tblLOLChamps WHERE Name = """ + ChampName + """").Tables(0).Rows(0).Item(0)
 
         'Get list of players in current the game
         Dim L As List(Of Player) = WSGetPlayerList(SummonerID)
@@ -134,8 +136,9 @@ Public Class Main
             End If
         Next
 
-        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " games, has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString() + " as " + ChampName + ".")
-        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + "/" + RequestedPlayer.DefensiveMasteryCount.ToString() + "/" + RequestedPlayer.UtilityMasteryCount.ToString())
+        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " games, has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
+        S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division + ".")
+        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " / " + RequestedPlayer.DefensiveMasteryCount.ToString() + " / " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
     End Sub
 
     Private Sub GetCurrentMatchStats()
@@ -158,7 +161,7 @@ Public Class Main
 
                 If P.GamesPlayed >= 10 Then 'ignore the rest of the stats if they haven't played a few games yet
                     If P.KDA > 3 Then
-                        SBInfo.Append(", has a K.D.A. of " + P.KDA.ToString())
+                        SBInfo.Append(", has a K.D.A. of " + P.KDA.ToString("F2"))
                     End If
 
                     If P.WinLoss > 60 Then
@@ -211,7 +214,7 @@ Public Class Main
 
             DBSummonerID = CLng(Temp.Substring(0, Temp.IndexOf(",")))
 
-            DB.DBInsert("INSERT INTO tblMaint SET KeyVal = """ + DBSummonerID.ToString() + """ WHERE DataKey = ""SummonerID""")
+            DB.DBUpdate("UPDATE tblMaint SET KeyVal = """ + DBSummonerID.ToString() + """ WHERE DataKey = ""SummonerID""")
         End If
 
         Return DBSummonerID
@@ -321,17 +324,6 @@ Public Class Player
         End Get
     End Property
 
-    Public Sub New(ByVal sName As String, ByVal iTeam As Integer, ByVal lSummonerID As Long, ByVal iChampionID As Integer)
-        Name = sName
-        If iTeam > 5 Then
-            Team = iTeam / 100
-        Else
-            Team = iTeam
-        End If
-        SummonerID = lSummonerID
-        ChampionID = iChampionID
-    End Sub
-
     Public Sub New(ByVal ParticipantXML As String)
         Dim Temp As String = ParticipantXML.Substring(ParticipantXML.IndexOf("""summonerName"":""") + 16)
         Name = Temp.Substring(0, Temp.IndexOf(""","))
@@ -346,34 +338,28 @@ Public Class Player
 
         'Masteries
         Temp = ParticipantXML.Substring(ParticipantXML.IndexOf("""masteries"":"))
-        Temp = ParticipantXML.Substring(0, ParticipantXML.IndexOf("]"))
+        Temp = Temp.Substring(0, Temp.IndexOf("]"))
 
-        OffensiveMasteryCount = CountWords(Temp, ":41")
-        DefensiveMasteryCount = CountWords(Temp, ":42")
-        UtilityMasteryCount = CountWords(Temp, ":43")
+        CalculateMasteries(Temp)
     End Sub
 
+    Private Sub CalculateMasteries(ByVal MasteryXML As String)
+        Dim Rank As Integer = -1
 
-    Public Function CountWords(ByVal input As String, ByVal phrase As String) As Integer
-        Dim Occurrences As Integer = 0
+        For Each S As String In MasteryXML.Split(New String() {"""rank"":"}, System.StringSplitOptions.RemoveEmptyEntries)
+            If Not S.Contains("masteries") Then
+                Rank = CInt(S.Substring(0, 1))
 
-        Dim intCursor As Integer = 0
-        Do Until intCursor >= input.Length
-
-            Dim strCheckThisString As String = Mid(LCase(input), intCursor + 1, (Len(input) - intCursor))
-
-            Dim intPlaceOfPhrase As Integer = InStr(strCheckThisString, phrase)
-            If intPlaceOfPhrase > 0 Then
-                Occurrences += 1
-                intCursor += (intPlaceOfPhrase + Len(phrase) - 1)
-            Else
-                intCursor = input.Length
+                If S.Contains(":41") Then
+                    OffensiveMasteryCount += Rank
+                ElseIf S.Contains(":42") Then
+                    DefensiveMasteryCount += Rank
+                ElseIf S.Contains(":43") Then
+                    UtilityMasteryCount += Rank
+                End If
             End If
-
-        Loop
-
-        Return Occurrences
-    End Function
+        Next
+    End Sub
 
     Private Sub AcquireLeagueDetails()
         Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + SummonerID.ToString() + "/entry?api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
