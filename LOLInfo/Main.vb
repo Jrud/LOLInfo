@@ -91,16 +91,23 @@ Public Class Main
             Return True
         ElseIf e.Result.Grammar Is GetGameInfo Then
             S.Say("Please wait while I collect the information")
-
-            GetCurrentMatchStats()
+            Try
+                GetCurrentMatchStats()
+            Catch ex As Exception
+                If ex.Message.Contains("(404) Not Found.") Then
+                    S.Say("You are not currently in a game.")
+                Else
+                    Throw ex
+                End If
+            End Try
         ElseIf e.Result.Grammar Is GetSummonerInfo Then
-            S.Say("Please wait while I collect the information")
+                S.Say("Please wait while I collect the information")
 
-            If e.Result.Text.Contains("enemy") Then
-                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
-            Else
-                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
-            End If
+                If e.Result.Text.Contains("enemy") Then
+                    GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                Else
+                    GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                End If
         End If
 
         Return False
