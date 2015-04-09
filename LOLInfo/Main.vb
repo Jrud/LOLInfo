@@ -147,7 +147,7 @@ Public Class Main
             End If
         Next
 
-        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " games, has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
+        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " ranked games as " + ChampName + ", has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
         S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division.ToString() + ".")
         S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " " + RequestedPlayer.DefensiveMasteryCount.ToString() + " and " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
         S.Say(RequestedPlayer.RuneList)
@@ -329,7 +329,7 @@ Public Class Player
     End Property
     Public ReadOnly Property Tier As String
         Get
-            If sTier = -1 Then
+            If sTier = "-1" Then
                 AcquireLeagueDetails()
             End If
 
@@ -420,27 +420,38 @@ Public Class Player
     Private Sub AcquireLeagueDetails()
         Dim WR As HttpWebRequest = HttpWebRequest.Create("https://na.api.pvp.net/api/lol/na/v2.5/league/by-summoner/" + SummonerID.ToString() + "/entry?api_key=920b706e-c903-441c-8e5a-ddc8654f8404")
 
-        Dim Resp As WebResponse = WR.GetResponse()
+        Dim Resp As WebResponse
 
-        Dim LeagueXML As String = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
+        Try
+            Resp = WR.GetResponse()
 
-        Dim Temp As String = LeagueXML.Substring(LeagueXML.IndexOf("""tier"":""") + 8)
-        sTier = Temp.Substring(0, Temp.IndexOf(""""))
+            Dim LeagueXML As String = (New StreamReader(Resp.GetResponseStream())).ReadToEnd()
 
-        Temp = LeagueXML.Substring(LeagueXML.IndexOf("""division"":""") + 12)
-        Dim tDivision As String = Temp.Substring(0, Temp.IndexOf(""""))
+            Dim Temp As String = LeagueXML.Substring(LeagueXML.IndexOf("""tier"":""") + 8)
+            sTier = Temp.Substring(0, Temp.IndexOf(""""))
 
-        If tDivision = "I" Then
-            iDivision = 1
-        ElseIf tDivision = "II" Then
-            iDivision = 2
-        ElseIf tDivision = "III" Then
-            iDivision = 3
-        ElseIf tDivision = "IV" Then
-            iDivision = 4
-        ElseIf tDivision = "V" Then
-            iDivision = 5
-        End If
+            Temp = LeagueXML.Substring(LeagueXML.IndexOf("""division"":""") + 12)
+            Dim tDivision As String = Temp.Substring(0, Temp.IndexOf(""""))
+
+            If tDivision = "I" Then
+                iDivision = 1
+            ElseIf tDivision = "II" Then
+                iDivision = 2
+            ElseIf tDivision = "III" Then
+                iDivision = 3
+            ElseIf tDivision = "IV" Then
+                iDivision = 4
+            ElseIf tDivision = "V" Then
+                iDivision = 5
+            End If
+        Catch ex As exception
+            If ex.Message.Contains("(404)") Then
+                iDivision = 0
+                sTier = "Unranked"
+            End If
+        End Try
+
+
     End Sub
 
     Private Sub AcquireRankedDetails(ByVal ChampID As Integer)
@@ -454,6 +465,13 @@ Public Class Player
                 Resp = WR.GetResponse()
                 Success = True
             Catch ex As Exception
+                If ex.Message.Contains("(404)") Then
+                    lGamesPlayed = 0
+                    dKD = 0
+                    dKDA = 0
+                    dWinLoss = 0
+                    Exit Sub
+                End If
                 Threading.Thread.Sleep(11000)
             End Try
         End While
