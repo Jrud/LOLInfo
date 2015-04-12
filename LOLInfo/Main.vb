@@ -10,7 +10,13 @@ Public Class Main
     Implements SCOUT.IRecognitionPlugin
 
     Public RunesXML As String
+    Public dSpeechDelay As Double = 0
 
+    Public ReadOnly Property SpeechDelay As Double Implements SCOUT.IRecognitionPlugin.SpeechDelay
+        Get
+            Return dSpeechDelay
+        End Get
+    End Property
 
     Public Function AddedFunctionality() As System.Collections.Generic.List(Of String) Implements SCOUT.IRecognitionPlugin.AddedFunctionality
         Dim SL As New List(Of String)
@@ -69,8 +75,8 @@ Public Class Main
         Dim DSChamps As DataSet = DB.DBSelect("SELECT Name FROM tblLOLChamps")
 
         For Each row As DataRow In DSChamps.Tables(0).Rows
-            CH.Add(New String() {"Tell me about the enemy " + row("name").ToString(), "Lets have the info on the enemy " + row("name").ToString(), "Gimme the stats for the enemy " + row("name").ToString(), "Give me the stats on the enemy " + row("name").ToString()})
-            CH.Add(New String() {"Tell me about the allied " + row("name").ToString(), "Lets have the info on the allied " + row("name").ToString(), "Gimme the stats for the allied " + row("name").ToString(), "Give me the stats on the allied " + row("name").ToString()})
+            CH.Add(New String() {"Tell me about the enemy " + row("name").ToString(), "Lets have the info on the enemy " + row("name").ToString(), "Lets have the stats on the enemy " + row("name").ToString(), "Gimme the stats for the enemy " + row("name").ToString(), "Give me the stats on the enemy " + row("name").ToString()})
+            CH.Add(New String() {"Tell me about the allied " + row("name").ToString(), "Lets have the info on the allied " + row("name").ToString(), "Lets have the stats on the allied " + row("name").ToString(), "Gimme the stats for the allied " + row("name").ToString(), "Give me the stats on the allied " + row("name").ToString()})
         Next
 
         GetSummonerInfo = New Grammar(CH)
@@ -96,18 +102,23 @@ Public Class Main
             Catch ex As Exception
                 If ex.Message.Contains("(404) Not Found.") Then
                     S.Say("You are not currently in a game.")
+                    dSpeechDelay = 2.5
                 Else
                     Throw ex
                 End If
             End Try
-        ElseIf e.Result.Grammar Is GetSummonerInfo Then
-                S.Say("Please wait while I collect the information")
 
-                If e.Result.Text.Contains("enemy") Then
-                    GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
-                Else
-                    GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
-                End If
+            Return True
+        ElseIf e.Result.Grammar Is GetSummonerInfo Then
+            S.Say("Please wait while I collect the information")
+
+            If e.Result.Text.Contains("enemy") Then
+                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+            Else
+                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+            End If
+
+            Return True
         End If
 
         Return False
@@ -147,14 +158,17 @@ Public Class Main
             End If
         Next
 
+
         S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " ranked games as " + ChampName + ", has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
         S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division.ToString() + ".")
         S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " " + RequestedPlayer.DefensiveMasteryCount.ToString() + " and " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
         S.Say(RequestedPlayer.RuneList)
+
+        dSpeechDelay = 20 + (RequestedPlayer.RuneTypeCount * 3.5)
     End Sub
 
     Private Sub GetCurrentMatchStats()
-
+        dSpeechDelay = 0
         Dim SummonerID As Long = WSGetSummonerID()
 
         Dim L As List(Of Player) = WSGetPlayerList(SummonerID)
@@ -170,14 +184,17 @@ Public Class Main
         For Each P As Player In L
             If Not P.Team = MyTeam Then
                 Dim SBInfo As New StringBuilder(ChampIDToName(P.ChampionID) + " is in " + P.Tier + " " + P.Division.ToString())
+                dSpeechDelay += 5.05
 
                 If P.GamesPlayed >= 10 Then 'ignore the rest of the stats if they haven't played a few games yet
                     If P.KDA > 3 Then
                         SBInfo.Append(", has a K.D.A. of " + P.KDA.ToString("F2"))
+                        dSpeechDelay += 3.5
                     End If
 
                     If P.WinLoss > 60 Then
                         SBInfo.Append(", has a win rate of " + P.WinLoss.ToString() + "%")
+                        dSpeechDelay += 2.5
                     End If
                 End If
 
@@ -234,6 +251,7 @@ Public Class Main
 
     Private Sub RequestSummonerName()
         S.Say("Please type in your summoner name")
+        dSpeechDelay = 1.5
 
         DB.DBUpdate("UPDATE tblMaint SET KeyVal = """ + InputBox("What is your summoner name?", "Input Summoner Name").Replace("""", """""") + """ WHERE DataKey = ""SummonerName""")
         DB.DBUpdate("UPDATE tblMaint SET KeyVal = ""-1"" WHERE DataKey = ""SummonerID""")
@@ -276,6 +294,7 @@ Public Class Player
     Public DefensiveMasteryCount As Integer
     Public UtilityMasteryCount As Integer
     Public RuneList As String
+    Public RuneTypeCount As Integer
 
     Public ReadOnly Property GamesPlayed As Long
         Get
@@ -379,6 +398,7 @@ Public Class Player
             RuneId = CInt(Temp.Substring(Temp.LastIndexOf(":") + 1).Replace("}", ""))
 
             SB.Append(Count.ToString() + " " + GetRuneName(RuneId, RunesXML) + ", ")
+            RuneTypeCount += 1
         Next
 
         Return SB.ToString()
