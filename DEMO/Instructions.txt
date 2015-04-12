@@ -21,10 +21,11 @@ To ask her about the plugins currently installed say "What can you do?", or "Com
 
 Many other commands will work, these are just examples to get started.
 
-When you are done with SCOUT, simply close the program, or you can say "Thanks Scout" to put her into sleeping mode.
+When you are done talking with SCOUT, simply close the program, or you can say "Thanks Scout" to put her into sleeping mode.
 
-If she doesn't understand something, she will say "What is...".  If using her in a loud room she may pick up a lot of background noise and try to make sense of it.  If using
-her with speakers, she may hear herself talk and think you are talking.  This can create a frustrating echo effect.  Use a headset for the best quality.
+If she doesn't understand something, she will say "What is...".  If using her in a loud room she may pick up a lot of background noise and try to make sense of it.  She attempts
+to ignore speech while she is talking, but there are still some glitches in this feature.  As a general rule, when the microphone icon is visible on the application, SCOUT is 
+listening.  Use a headset for the best quality.
 
 
 
