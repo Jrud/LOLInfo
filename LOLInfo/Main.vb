@@ -112,11 +112,40 @@ Public Class Main
         ElseIf e.Result.Grammar Is GetSummonerInfo Then
             S.Say("Please wait while I collect the information")
 
-            If e.Result.Text.Contains("enemy") Then
-                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
-            Else
-                GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
-            End If
+            Try
+                If e.Result.Text.Contains("enemy") Then
+                    If e.Result.Text.Contains("Tell me about the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                    ElseIf e.Result.Text.Contains("Lets have the info on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Lets have the info on the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                    ElseIf e.Result.Text.Contains("Lets have the stats on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Lets have the stats on the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                    ElseIf e.Result.Text.Contains("Gimme the stats for the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Gimme the stats for the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                    ElseIf e.Result.Text.Contains("Give me the stats on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Give me the stats on the ", "").Replace("enemy ", "").Replace("allied ", ""), "enemy")
+                    End If
+                Else
+                    If e.Result.Text.Contains("Tell me about the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Tell me about the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                    ElseIf e.Result.Text.Contains("Lets have the info on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Lets have the info on the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                    ElseIf e.Result.Text.Contains("Lets have the stats on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Lets have the stats on the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                    ElseIf e.Result.Text.Contains("Gimme the stats for the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Gimme the stats for the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                    ElseIf e.Result.Text.Contains("Give me the stats on the ") Then
+                        GetPlayerStats(e.Result.Text.Replace("Give me the stats on the ", "").Replace("enemy ", "").Replace("allied ", ""), "allied")
+                    End If
+                End If
+            Catch ex As Exception
+                If ex.Message.Contains("(404) Not Found.") Then
+                    S.Say("You are not currently in a game.")
+                    dSpeechDelay = 2.5
+                Else
+                    Throw ex
+                End If
+            End Try
 
             Return True
         End If

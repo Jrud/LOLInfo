@@ -32,3 +32,4 @@ F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbproj.GenerateResource.Cache
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.dll
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.xml
 F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.pdb
+F:\GIT\LOLInfo\LOLInfo\obj\Debug\LOLInfo.vbprojResolveAssemblyReference.cache
