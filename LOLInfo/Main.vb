@@ -102,7 +102,7 @@ Public Class Main
             Catch ex As Exception
                 If ex.Message.Contains("(404) Not Found.") Then
                     S.Say("You are not currently in a game.")
-                    dSpeechDelay = 2.5
+                    dSpeechDelay = 4
                 Else
                     Throw ex
                 End If
@@ -141,7 +141,7 @@ Public Class Main
             Catch ex As Exception
                 If ex.Message.Contains("(404) Not Found.") Then
                     S.Say("You are not currently in a game.")
-                    dSpeechDelay = 2.5
+                    dSpeechDelay = 4
                 Else
                     Throw ex
                 End If
@@ -306,6 +306,12 @@ Public Class Main
             Return dsName.Tables(0).Rows(0).Item(0).ToString()
         End If
     End Function
+
+    Public ReadOnly Property Img As System.Drawing.Image Implements SCOUT.IRecognitionPlugin.Img
+        Get
+            Return My.Resources.ScoutLeague
+        End Get
+    End Property
 End Class
 
 Public Class Player
