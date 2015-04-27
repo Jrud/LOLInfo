@@ -61,7 +61,7 @@ Public Class Main
     End Sub
 
     Dim LOLGrammarList As New List(Of System.Speech.Recognition.Grammar)
-    Private SetSummoner As Grammar = New Grammar(New Choices(New String() {"Set Summoner Name", "Set My Summoner Name", "Set The Summoner Name", "I Would Like To Set My Summoner Name", "Lets Set My Summoner Name", "Set My Summoner Name Please", "Set Summoner Name Please", "Lets Set My Summoner Name Please", "Give Me A Tactical Analysis Of The Enemy Team", "Let's Have A Tactical Analysis"}))
+    Private SetSummoner As Grammar = New Grammar(New Choices(New String() {"Set Summoner Name", "Change Summoner Name", "Set My Summoner Name", "Set The Summoner Name", "I Would Like To Set My Summoner Name", "Lets Set My Summoner Name", "Set My Summoner Name Please", "Set Summoner Name Please", "Lets Set My Summoner Name Please", "Give Me A Tactical Analysis Of The Enemy Team", "Let's Have A Tactical Analysis"}))
     Private GetGameInfo As Grammar = New Grammar(New Choices(New String() {"Get Basic Game Info", "Get Current Match Info", "Get Current Match Stats", "Match Info", "Match Stats", "Match Stats Please", "Give Me The Match Stats Please", "Current Match Stats", "Current Match Info"}))
     Private GetSummonerInfo As Grammar
 
@@ -187,13 +187,16 @@ Public Class Main
             End If
         Next
 
+        If RequestedPlayer Is Nothing Then
+            S.Say("There is no " + ChampName + " on the " + team + " team")
+        Else
+            S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " ranked games as " + ChampName + ", has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
+            S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division.ToString() + ".")
+            S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " " + RequestedPlayer.DefensiveMasteryCount.ToString() + " and " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
+            S.Say(RequestedPlayer.RuneList)
 
-        S.Say("The " + team + " " + ChampName + " has played " + RequestedPlayer.GamesPlayed.ToString() + " ranked games as " + ChampName + ", has a win ratio of " + RequestedPlayer.WinLoss.ToString() + "%, and has a K.D.A. of " + RequestedPlayer.KDA.ToString("F2") + " as " + ChampName + ".")
-        S.Say("The " + ChampName + " is in " + RequestedPlayer.Tier + " " + RequestedPlayer.Division.ToString() + ".")
-        S.Say(ChampName + "'s mastery page is currently set to " + RequestedPlayer.OffensiveMasteryCount.ToString() + " " + RequestedPlayer.DefensiveMasteryCount.ToString() + " and " + RequestedPlayer.UtilityMasteryCount.ToString() + ".")
-        S.Say(RequestedPlayer.RuneList)
-
-        dSpeechDelay = 20 + (RequestedPlayer.RuneTypeCount * 3.5)
+            dSpeechDelay = 20 + (RequestedPlayer.RuneTypeCount * 3)
+        End If
     End Sub
 
     Private Sub GetCurrentMatchStats()
@@ -300,6 +303,8 @@ Public Class Main
             Dim name As String = Temp.Substring(0, Temp.IndexOf(""""))
 
             DB.DBInsert("INSERT INTO tblLOLChamps (Name, ChampID) VALUES (""" + name + """, " + ChampID.ToString() + ")")
+
+            SE.LoadMainMenuGrammar()
 
             Return name
         Else
